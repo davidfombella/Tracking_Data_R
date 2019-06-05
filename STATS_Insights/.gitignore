@@ -1,0 +1,3 @@
+# Ignora pickle files
+*.pkl
+*.Rhistory
