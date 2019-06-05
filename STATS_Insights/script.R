@@ -39,3 +39,15 @@ anim_save("output_convexhull_seq_1001.gif")
 soccerAnimate(df, "sequence_1001", method="clean")
 
 anim_save("output_clean_seq_1001.gif") 
+
+
+
+
+
+
+### Voronoi 5170
+soccerAnimate(df, "sequence_5170", method="voronoi")  #sequence name from Stats dataset (train)
+
+
+
+anim_save("output_woronoi_seq_5170.gif")
