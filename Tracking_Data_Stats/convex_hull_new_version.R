@@ -34,21 +34,20 @@ df <- df %>% filter(sequ == "sequence_2")
 
 # save(data, file = "mydata.rda")
 
+
+names(data) <- c(paste('team A_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
+                 paste('team B_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
+                 paste('ball_0_', c('x', 'y'), sep = ''))
+
+
+
+
+
 #############################################
 # jump here
 #############################################
 
 load(file = "mydata.rda")
-
-##################
-######## NUEVO
-#################
-data <- df %>% select(-sequ)
-
-
-names(data) <- c(paste('team A_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
-                 paste('team B_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
-                 paste('ball_0_', c('x', 'y'), sep = ''))
 
 
 
