@@ -21,22 +21,24 @@ data <- read_pickle_file("test_data_1.pkl")  # filename from Stats dataset
 ## Get dataframe with all data
 dt_list <- map(data, as.data.frame)
 dt_data <- rbindlist(dt_list, fill=TRUE, idcol=T)
-df <- dt_data %>%
+data <- dt_data %>%
       rename(sequ=.id) %>%
       arrange(sequ)
 
 
-# write.csv(df, "test_1.csv", row.names=F)
-# write.csv(df, "data_train.csv", row.names=F)
+# write.csv(data, "test_1.csv", row.names=F)
+# write.csv(data, "data_train.csv", row.names=F)
 
 
 # Filter a single sequence
-df <- df %>% filter(sequ == "sequence_2")
-  
+data <- data %>% filter(sequ == "sequence_2")
 
-# save(data, file = "mydata.rda")
+# Remove first column
+data <- data %>% select(-sequ) 
 
 
+
+# change names for dataframe columns
 names(data) <- c(paste('team A_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
                  paste('team B_', rep(1:11, each = 2), '_', c('x', 'y'), sep = ''), 
                  paste('ball_0_', c('x', 'y'), sep = ''))
@@ -53,15 +55,9 @@ data <- data %>%
 
 
 
-#############################################
-# jump here
-#############################################
-
-load(file = "mydata.rda")
 
 
-
-
+# Add new lines to dataframe
 # coordinates are recorded every 0.1 second. To ensure we have a smooth animation we can interpolate the
 # coordinates with tweenr package
 
@@ -71,6 +67,23 @@ data <- data %>%
   mutate(ease = 'linear') %>%
   tween_elements('time', 'group', 'ease', nframes = 2 * max(.$time)) %>%
   separate(col = .group, into = c('team', 'player'), sep = '_')
+
+
+
+#############################################
+# save(data, file = "mydata.rda")
+#############################################
+# LOAD data dataframe
+#############################################
+
+# load(file = "mydata.rda")
+
+############################################
+# time  x      y      .frame  team player
+# 1.0   -8.19   18.57   0    ball  0
+# 1.0 46.30 1.31    0 team A    1
+############################################
+
 
 
 
