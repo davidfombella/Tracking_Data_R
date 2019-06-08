@@ -13,6 +13,8 @@ library(gganimate)
 
 ## Load data
 #(https://stackoverflow.com/questions/35121192/reading-a-pickle-file-pandas-python-data-frame-in-r)
+
+
 source_python("script.py")
 data <- read_pickle_file("test_data_1.pkl")  # filename from Stats dataset
 
@@ -43,14 +45,6 @@ names(data) <- c(paste('team A_', rep(1:11, each = 2), '_', c('x', 'y'), sep = '
 
 
 
-#############################################
-# jump here
-#############################################
-
-load(file = "mydata.rda")
-
-
-
 data <- data %>% 
   mutate(time = row_number()) %>% 
   gather(key, value, -time) %>% 
@@ -58,6 +52,12 @@ data <- data %>%
   spread(coordinate, value)
 
 
+
+#############################################
+# jump here
+#############################################
+
+load(file = "mydata.rda")
 
 
 
@@ -76,6 +76,7 @@ data <- data %>%
 
 # calculating convex hull for each team and .frame. I exclude the goalkeepers as the convex hull with
 # only outfield players gives a nice visualisation of defence line disposure and therefore is more informative
+
 data_hull <- data %>%
   filter(player != 1) %>% 
   group_by(team, .frame) %>%
@@ -87,38 +88,28 @@ data_hull <- data %>%
   select(-data) %>%
   unnest()
 
+
+
+#########################################################################
+
 p <- pitch_plot(68, 105) +
-  geom_polygon(data = filter(data_hull, team == 'team A'), aes(x, y, frame = .frame), fill = 'red', alpha = 0.4) +
-  geom_polygon(data = filter(data_hull, team == 'team B'), aes(x, y, frame = .frame), fill = 'blue', alpha = 0.4) +
-  geom_point(data = filter(data, str_detect(team, 'team')), aes(x, y, group = player, fill = team, frame = .frame), shape = 21, size = 6, stroke = 2) +
-  geom_point(data = filter(data, team == 'ball'), aes(x, y, frame = .frame), shape = 21, fill = 'dark orange', size = 4) +
+  geom_polygon(data = filter(data_hull, team == 'team A'), aes(x, y), fill = 'red', alpha = 0.4) +
+  geom_polygon(data = filter(data_hull, team == 'team B'), aes(x, y), fill = 'blue', alpha = 0.4) +
+  geom_point(data = filter(data, str_detect(team, 'team')), aes(x, y, group = player, fill = team), shape = 21, size = 6, stroke = 2) +
+  geom_point(data = filter(data, team == 'ball'), aes(x, y), shape = 21, fill = 'dark orange', size = 4) +
+  transition_time(.frame) +
   scale_fill_manual(values = c('team A' = 'red', 'team B' = 'blue')) +
-  geom_text(data = filter(data, str_detect(team, 'team')), aes(x, y, label = player, frame = .frame), color = 'white') +
+  geom_text(data = filter(data, str_detect(team, 'team')), aes(x, y, label = player), color = 'white') +
   guides(fill = FALSE)
 
-animation::ani.options(ani.width = 735, ani.height = 476)
 
 
-## OLD API
-gganimate(p, 'sequence_2.gif', interval = 0.05, title_frame = FALSE)
-
-####################
 animate(p,width = 1024, nframes=max(data$.frame), height = 768,fps = 10)
-p
+
+anim_save("sequence2_10fps.gif") 
 
 
-######## p2 trial
+# 20fps
+animate(p,width = 1024, nframes=max(data$.frame), height = 768,fps = 20)
 
-p2 <- pitch_plot(68, 105) +
-  geom_polygon(data = filter(data_hull, team == 'team A'), aes(x, y, frame = .frame), fill = 'red', alpha = 0.4) +
-  geom_polygon(data = filter(data_hull, team == 'team B'), aes(x, y, frame = .frame), fill = 'blue', alpha = 0.4) +
-  geom_point(data = filter(data, str_detect(team, 'team')), aes(x, y, group = player, fill = team, frame = .frame), shape = 21, size = 6, stroke = 2) +
-  geom_point(data = filter(data, team == 'ball'), aes(x, y, frame = .frame), shape = 21, fill = 'dark orange', size = 4) +
-  scale_fill_manual(values = c('team A' = 'red', 'team B' = 'blue')) +
-  transition_time(data$.frame) +
-  geom_text(data = filter(data, str_detect(team, 'team')), aes(x, y, label = player, frame = .frame), color = 'white') +
-  guides(fill = FALSE)
-
-
-
-animate(p2,width = 1024, nframes=max(data$.frame), height = 768,fps = 10)
+anim_save("sequence2_20fps.gif") 
