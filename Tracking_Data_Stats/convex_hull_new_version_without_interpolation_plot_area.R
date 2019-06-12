@@ -121,7 +121,7 @@ data_hull <- data %>%
 
 
 # temporary filters
-#  data <- data %>%  filter(time < 10)
+#   data <- data %>%  filter(time < 10)
 #  data_hull <- data_hull %>%  filter(time < 10)
 
 #########################################################################
@@ -135,15 +135,15 @@ p <- pitch_plot(68, 105) +
   transition_time(time) +
   scale_fill_manual(values = c('team A' = 'red', 'team B' = 'blue')) +
   geom_text(data = filter(data, str_detect(team, 'team')), aes(x, y, label = player), color = 'white') +
+  # team B blue
+  geom_text(data = filter(data_hull,team =='team B'),aes(x=-20, y=-36, label = paste("Blue Area: ",as.character(round(area))) ),size=5,color='blue') +
   # team A red
-  geom_text(data = filter(data_hull,team =='team A'),aes(x=+20, y=-36, label = paste("Area",as.character(round(area))), color = 'red',size=1)) +
-  # team B
-  geom_text(data = filter(data_hull,team =='team B'),aes(x=-20, y=-36, label = paste("Area",as.character(round(area))), color = 'blue',size=1)) +
-  theme(legend.position = "none")
+  geom_text(data = filter(data_hull,team =='team A'),aes(x=+20, y=-36, label = paste("Red Area: ",as.character(round(area))) ) ,size=5,color='red') +
+ theme(legend.position = "none")
 
 
 
-animate(p,width = 735, nframes=max(data$time), height = 476,fps = 10)
+animate(p,width = 735, nframes=max(data$time), height = 476,fps = 5)
 
 
 anim_save("sequence2_without_int_area_10fps.gif") 
