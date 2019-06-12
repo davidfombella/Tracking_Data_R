@@ -88,45 +88,41 @@ data <- data %>%
 ############################################
 
 
-
-
 # calculating convex hull for each team and .frame. I exclude the goalkeepers as the convex hull with
 # only outfield players gives a nice visualisation of defence line disposure and therefore is more informative
 
-data_hull <- data %>%
-  filter(player != 1) %>% 
-  group_by(team, time) %>%
-  nest() %>%
-  mutate(
-    hull = map(data, ~ with(.x, chull(x, y))),
-    out = map2(data, hull, ~ .x[.y,,drop=FALSE])
-  ) %>%
-  select(-data) %>%
-  unnest()
-
-
+# OLD  without AREA
+# data_hull <- data %>%
+#   filter(player != 1) %>% 
+#   group_by(team, time) %>%
+#   nest() %>%
+#   mutate(
+#     hull = map(data, ~ with(.x, chull(x, y))),
+#     out = map2(data, hull, ~ .x[.y,,drop=FALSE])
+#   ) %>%
+#   select(-data) %>%
+#   unnest()
 
 # AREA FOR EACH POLYGON convex hull
 
-data %>%
+data_hull <- data %>% 
   filter(player != 1) %>% 
-  group_by(team, time) %>%
-  nest() %>%
-  mutate(
-    hull = map(data, ~ with(.x, chull(x, y))),
-    out = map2(data, hull, ~ .x[.y,,drop=FALSE])
-    #,out3 = as.data.frame(map2(data, hull, ~ .x[.y,,drop=FALSE]))
-    # ,area =  Polygon(   map2(data, hull, ~ .x[.y,,drop=FALSE]), hole=F)@area
-  )
-
+  group_by(team, time) %>% 
+  nest() %>% 
+  mutate( hull = map(data, ~ with(.x, chull(x, y))), 
+          out = map2(data, hull, ~ .x[.y,,drop=FALSE]), 
+          polygon = map(out, ~.x %>% select(x, y) %>% 
+                      as.matrix() %>% sp::Polygon(hole = FALSE)), area = map_dbl(polygon, ~.x@area) ) %>% 
+  select(-data, -polygon) %>% 
+  unnest()
 
 
 
 
 
 # temporary filters
-# data <- data %>%  filter(time < 10)
-# data_hull <- data_hull %>%  filter(time < 10)
+#  data <- data %>%  filter(time < 10)
+#  data_hull <- data_hull %>%  filter(time < 10)
 
 #########################################################################
 
@@ -139,20 +135,16 @@ p <- pitch_plot(68, 105) +
   transition_time(time) +
   scale_fill_manual(values = c('team A' = 'red', 'team B' = 'blue')) +
   geom_text(data = filter(data, str_detect(team, 'team')), aes(x, y, label = player), color = 'white') +
-  # team A
-  geom_text(data = filter(data_hull, team == 'team A'), 
-            aes(x=+20, y=-36, label = paste("Time",as.character(time)), color = 'red')) +
+  # team A red
+  geom_text(data = filter(data_hull,team =='team A'),aes(x=+20, y=-36, label = paste("Area",as.character(round(area))), color = 'red',size=1)) +
   # team B
-  geom_text(data = filter(data_hull, team == 'team B')%>% filter(time == time) %>% select(x,y), 
-            aes(x=-20, y=-36, label = paste("Area ",round(Polygon(filter(data_hull, team == 'team B')%>% filter(time == time) %>% select(x,y), hole=F)@area)), color = 'blue')) +
-  guides(fill = FALSE)
-  # annotate("text", label = round(Polygon(filter(data_hull, team == 'team B')%>% filter(time == time) %>% select(x,y), hole=F)@area), x = -20, y = -37, size = 5, colour = "blue")+
-  # annotate("text", label = round(Polygon(filter(data_hull, team == 'team A')%>% filter(time == time) %>% select(x,y), hole=F)@area), x = +20, y = -37, size = 5, colour = "red")
-   #+ labs( title = paste("Time",as.character(time)))
+  geom_text(data = filter(data_hull,team =='team B'),aes(x=-20, y=-36, label = paste("Area",as.character(round(area))), color = 'blue',size=1)) +
+  theme(legend.position = "none")
 
 
 
 animate(p,width = 735, nframes=max(data$time), height = 476,fps = 10)
+
 
 anim_save("sequence2_without_int_area_10fps.gif") 
 
