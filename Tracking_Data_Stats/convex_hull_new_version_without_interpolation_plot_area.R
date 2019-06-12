@@ -145,7 +145,9 @@ p <- pitch_plot(68, 105) +
 
 animate(p,width = 735, nframes=max(data$time), height = 476,fps = 5)
 
-
+anim_save("sequence2_without_int_area_5fps.gif")
+          
+          
 anim_save("sequence2_without_int_area_10fps.gif") 
 
 
